@@ -1,7 +1,7 @@
-package com.example.features
+package com.github.itsempa.cyclabox.features
 
-import com.example.ExampleMod
-import com.example.utils.ChatUtils
+import com.github.itsempa.cyclabox.ExampleMod
+import com.github.itsempa.cyclabox.utils.ChatUtils
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
