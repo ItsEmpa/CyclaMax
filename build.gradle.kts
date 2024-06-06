@@ -14,7 +14,7 @@ plugins {
 }
 
 group = "com.github.itsempa.cyclamax"
-version = "0.0.1-indev"
+version = "0.0.1"
 
 val gitHash by lazy {
     val baos = ByteArrayOutputStream()
@@ -80,23 +80,16 @@ dependencies {
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
 
     implementation(kotlin("stdlib-jdk8"))
-    shadowImpl("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3") {
-        exclude(group = "org.jetbrains.kotlin")
-    }
-
     headlessLwjgl(libs.headlessLwjgl)
 
     // If you don't want mixins, remove these lines
-
+    /*
     shadowImpl("org.spongepowered:mixin:0.7.11-SNAPSHOT") {
         isTransitive = false
-    }
+    }*/
     annotationProcessor("org.spongepowered:mixin:0.8.4-SNAPSHOT")
 
     implementation(kotlin("stdlib-jdk8"))
-    shadowImpl("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3") {
-        exclude(group = "org.jetbrains.kotlin")
-    }
 
     // If you don't want to log in with your real minecraft account, remove this line
     runtimeOnly("me.djtheredstoner:DevAuth-forge-legacy:1.1.2")
@@ -120,20 +113,7 @@ dependencies {
     }
 
     shadowModImpl(libs.moulconfig)
-    shadowImpl(libs.libautoupdate) {
-        exclude(module = "gson")
-    }
     shadowImpl("org.jetbrains.kotlin:kotlin-reflect:1.9.0")
-    //implementation(libs.hotswapagentforge)
-
-    testImplementation("com.github.NotEnoughUpdates:NotEnoughUpdates:4957f0b:all") {
-        exclude(module = "unspecified")
-        isTransitive = false
-    }
-    testImplementation("com.github.hannibal002:SkyHanni:0.26.Beta.5:") {
-        exclude(module = "unspecified")
-        isTransitive = false
-    }
 }
 
 kotlin {
@@ -195,7 +175,7 @@ tasks.withType(JavaCompile::class) {
 
 tasks.withType(Jar::class) {
     destinationDirectory.set(project.layout.buildDirectory.dir("badjars"))
-    archiveBaseName.set("CyclaBox")
+    archiveBaseName.set("CyclaMax")
     manifest.attributes.run {
         this["FMLCorePluginContainsFMLMod"] = "true"
         this["ForceLoadAsMod"] = "true"
