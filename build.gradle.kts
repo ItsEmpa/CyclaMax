@@ -1,4 +1,6 @@
+import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.ByteArrayOutputStream
 
 plugins {
     idea
@@ -7,15 +9,22 @@ plugins {
     id("dev.architectury.architectury-pack200") version "0.1.3"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     kotlin("jvm") version "1.9.0"
+    kotlin("plugin.serialization") version "1.8.0"
+    id("com.bnorm.power.kotlin-power-assert") version "0.13.0"
 }
 
-//Constants:
+group = "com.github.itsempa.cyclamax"
+version = "0.0.1-indev"
 
-val baseGroup: String by project
-val mcVersion: String by project
-val version: String by project
-val mixinGroup = "$baseGroup.mixin"
-val modid: String by project
+val gitHash by lazy {
+    val baos = ByteArrayOutputStream()
+    exec {
+        standardOutput = baos
+        commandLine("git", "rev-parse", "--short", "HEAD")
+        isIgnoreExitValue = true
+    }
+    baos.toByteArray().decodeToString().trim()
+}
 
 // Toolchains:
 java {
@@ -35,12 +44,16 @@ repositories {
     mavenLocal()
 
     maven("https://repo.spongepowered.org/maven/")
-
     // If you don't want to log in with your real minecraft account, remove this line
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
-
+    maven("https://jitpack.io") {
+        content {
+            includeGroupByRegex("com\\.github\\..*")
+        }
+    }
     maven("https://repo.nea.moe/releases")
-    maven("https://maven.notenoughupdates.org/releases")
+    maven("https://maven.notenoughupdates.org/releases") // NotEnoughUpdates (dev env)
+    maven("https://maven.teamresourceful.com/repository/thatgravyboat/") // DiscordIPC
 }
 
 val shadowImpl: Configuration by configurations.creating {
@@ -56,6 +69,11 @@ val devenvMod: Configuration by configurations.creating {
     isVisible = false
 }
 
+val headlessLwjgl by configurations.creating {
+    isTransitive = false
+    isVisible = false
+}
+
 dependencies {
     minecraft("com.mojang:minecraft:1.8.9")
     mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
@@ -66,43 +84,55 @@ dependencies {
         exclude(group = "org.jetbrains.kotlin")
     }
 
+    headlessLwjgl(libs.headlessLwjgl)
+
     // If you don't want mixins, remove these lines
+
     shadowImpl("org.spongepowered:mixin:0.7.11-SNAPSHOT") {
         isTransitive = false
     }
-    annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT")
+    annotationProcessor("org.spongepowered:mixin:0.8.4-SNAPSHOT")
+
+    implementation(kotlin("stdlib-jdk8"))
+    shadowImpl("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3") {
+        exclude(group = "org.jetbrains.kotlin")
+    }
 
     // If you don't want to log in with your real minecraft account, remove this line
     runtimeOnly("me.djtheredstoner:DevAuth-forge-legacy:1.1.2")
 
+    modCompileOnly("com.github.hannibal002:notenoughupdates:4957f0b:all") {
+        exclude(module = "unspecified")
+        isTransitive = false
+    }
+    devenvMod("com.github.NotEnoughUpdates:NotEnoughUpdates:2.2.2:all") {
+        exclude(module = "unspecified")
+        isTransitive = false
+    }
+
+    modCompileOnly("com.github.hannibal002:SkyHanni:0.26.Beta.5:") {
+        exclude(group = "null", module = "unspecified")
+        isTransitive = false
+    }
+    devenvMod("com.github.hannibal002:SkyHanni:0.26.Beta.5:") {
+        exclude(group = "null", module = "unspecified")
+        isTransitive = false
+    }
+
     shadowModImpl(libs.moulconfig)
-    devenvMod(variantOf(libs.moulconfig) { classifier("test") })
-
-    shadowImpl(libs.libautoupdate)
+    shadowImpl(libs.libautoupdate) {
+        exclude(module = "gson")
+    }
     shadowImpl("org.jetbrains.kotlin:kotlin-reflect:1.9.0")
-}
+    //implementation(libs.hotswapagentforge)
 
-// Minecraft configuration:
-loom {
-    launchConfigs {
-        "client" {
-            // If you don't want mixins, remove these lines
-            property("mixin.debug", "true")
-            property("asmhelper.verbose", "true")
-            arg("--tweakClass", "org.spongepowered.asm.launch.MixinTweaker")
-
-            arg("--mods", devenvMod.resolve().joinToString(",") { it.relativeTo(file("run")).path })
-        }
+    testImplementation("com.github.NotEnoughUpdates:NotEnoughUpdates:4957f0b:all") {
+        exclude(module = "unspecified")
+        isTransitive = false
     }
-    forge {
-        pack200Provider.set(dev.architectury.pack200.java.Pack200Adapter())
-        // If you don't want mixins, remove this lines
-        mixinConfig("mixins.$modid.json")
-    }
-    // If you don't want mixins, remove these lines
-    @Suppress("UnstableApiUsage")
-    mixin {
-        defaultRefmapName.set("mixins.$modid.refmap.json")
+    testImplementation("com.github.hannibal002:SkyHanni:0.26.Beta.5:") {
+        exclude(module = "unspecified")
+        isTransitive = false
     }
 }
 
@@ -115,7 +145,44 @@ kotlin {
     }
 }
 
-// Tasks:
+// Minecraft configuration:
+loom {
+    launchConfigs {
+        "client" {
+            property("mixin.debug", "true")
+            property("devauth.configDir", rootProject.file(".devauth").absolutePath)
+            arg("--tweakClass", "org.spongepowered.asm.launch.MixinTweaker")
+            arg("--tweakClass", "io.github.notenoughupdates.moulconfig.tweaker.DevelopmentResourceTweaker")
+            arg("--mods", devenvMod.resolve().joinToString(",") { it.relativeTo(file("run")).path })
+        }
+    }
+    forge {
+        pack200Provider.set(dev.architectury.pack200.java.Pack200Adapter())
+        mixinConfig("mixins.cyclamax.json")
+    }
+    @Suppress("UnstableApiUsage")
+    mixin {
+        defaultRefmapName.set("mixins.cyclamax.refmap.json")
+    }
+    runConfigs {
+        "client" {
+            if (SystemUtils.IS_OS_MAC_OSX) {
+                vmArgs.remove("-XstartOnFirstThread")
+            }
+            vmArgs.add("-Xmx4G")
+        }
+        "server" {
+            isIdeConfigGenerated = false
+        }
+    }
+}
+
+tasks.processResources {
+    inputs.property("version", version)
+    filesMatching("mcmod.info") {
+        expand("version" to version)
+    }
+}
 
 tasks.compileJava {
     dependsOn(tasks.processResources)
@@ -125,42 +192,23 @@ tasks.withType(JavaCompile::class) {
     options.encoding = "UTF-8"
 }
 
+
 tasks.withType(Jar::class) {
-    archiveBaseName.set(modid)
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    destinationDirectory.set(project.layout.buildDirectory.dir("badjars"))
+    archiveBaseName.set("CyclaBox")
     manifest.attributes.run {
         this["FMLCorePluginContainsFMLMod"] = "true"
         this["ForceLoadAsMod"] = "true"
 
-        // If you don't want mixins, remove these lines
         this["TweakClass"] = "org.spongepowered.asm.launch.MixinTweaker"
-        this["MixinConfigs"] = "mixins.$modid.json"
+        this["MixinConfigs"] = "mixins.cyclamax.json"
     }
 }
-
-tasks.processResources {
-    inputs.property("version", project.version)
-    inputs.property("mcversion", mcVersion)
-    inputs.property("modid", modid)
-    inputs.property("mixinGroup", mixinGroup)
-
-    filesMatching(listOf("mcmod.info", "mixins.$modid.json")) {
-        expand(inputs.properties)
-    }
-
-    rename("(.+_at.cfg)", "META-INF/$1")
-}
-
 
 val remapJar by tasks.named<net.fabricmc.loom.task.RemapJarTask>("remapJar") {
     archiveClassifier.set("")
     from(tasks.shadowJar)
     input.set(tasks.shadowJar.get().archiveFile)
-}
-
-tasks.jar {
-    archiveClassifier.set("without-deps")
-    destinationDirectory.set(layout.buildDirectory.dir("badjars"))
 }
 
 tasks.shadowJar {
@@ -169,24 +217,30 @@ tasks.shadowJar {
     configurations = listOf(shadowImpl, shadowModImpl)
     doLast {
         configurations.forEach {
-            println("Copying jars into mod: ${it.files}")
+            println("Config: ${it.files}")
         }
     }
     exclude("META-INF/versions/**")
-
-    // If you want to include other dependencies and shadow them, you can relocate them in here
-    relocate("io.github.moulberry.moulconfig", "$baseGroup.deps.moulconfig")
-    relocate("moe.nea.libautoupdate", "$baseGroup.deps.libautoupdate")
+    mergeServiceFiles()
+    relocate("io.github.notenoughupdates.moulconfig", "com.github.itsempa.cyclamax.deps.moulconfig")
 }
 
 tasks.jar {
     archiveClassifier.set("nodeps")
     destinationDirectory.set(layout.buildDirectory.dir("badjars"))
 }
-
 tasks.assemble.get().dependsOn(tasks.remapJar)
 
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
     jvmTarget = "1.8"
+}
+val compileTestKotlin: KotlinCompile by tasks
+compileTestKotlin.kotlinOptions {
+    jvmTarget = "1.8"
+}
+val sourcesJar by tasks.creating(Jar::class) {
+    destinationDirectory.set(layout.buildDirectory.dir("badjars"))
+    archiveClassifier.set("src")
+    from(sourceSets.main.get().allSource)
 }

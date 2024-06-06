@@ -1,6 +1,17 @@
-.idea/
+.idea/*
+!.idea/icon.svg
 .vscode/
 run/
 build/
-.gradle/
+bin/
 
+# gradle
+build
+gradle.properties
+.gradle
+
+# other
+.DS_STORE
+
+.devauth/*
+!.devauth/config.toml
