@@ -23,4 +23,4 @@ plugins {
 }
 
 
-rootProject.name = "CyclaBox"
+rootProject.name = "CyclaMax"
