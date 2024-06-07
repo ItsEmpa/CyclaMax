@@ -9,7 +9,6 @@ import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import java.io.File
 
 @Mod(
@@ -21,7 +20,7 @@ import java.io.File
 class CyclaMax {
 
     @Mod.EventHandler
-    fun init(event: FMLPreInitializationEvent) {
+    fun init(event: FMLInitializationEvent) {
         loadModule(CyclaBox())
         ClientCommandHandler.instance.registerCommand(ConfigCommand)
     }
