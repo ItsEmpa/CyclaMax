@@ -103,11 +103,11 @@ dependencies {
         isTransitive = false
     }
 
-    modCompileOnly("com.github.hannibal002:SkyHanni:0.26.Beta.5:") {
+    modCompileOnly("com.github.hannibal002:SkyHanni:0.26.Beta.8:") {
         exclude(group = "null", module = "unspecified")
         isTransitive = false
     }
-    devenvMod("com.github.hannibal002:SkyHanni:0.26.Beta.5:") {
+    devenvMod("com.github.hannibal002:SkyHanni:0.26.Beta.8:") {
         exclude(group = "null", module = "unspecified")
         isTransitive = false
     }
@@ -129,21 +129,21 @@ kotlin {
 loom {
     launchConfigs {
         "client" {
-            property("mixin.debug", "true")
+            //property("mixin.debug", "true")
             property("devauth.configDir", rootProject.file(".devauth").absolutePath)
-            arg("--tweakClass", "org.spongepowered.asm.launch.MixinTweaker")
+            //arg("--tweakClass", "org.spongepowered.asm.launch.MixinTweaker")
             arg("--tweakClass", "io.github.notenoughupdates.moulconfig.tweaker.DevelopmentResourceTweaker")
             arg("--mods", devenvMod.resolve().joinToString(",") { it.relativeTo(file("run")).path })
         }
     }
     forge {
         pack200Provider.set(dev.architectury.pack200.java.Pack200Adapter())
-        mixinConfig("mixins.cyclamax.json")
+        //mixinConfig("mixins.cyclamax.json")
     }
-    @Suppress("UnstableApiUsage")
+    /*@Suppress("UnstableApiUsage")
     mixin {
         defaultRefmapName.set("mixins.cyclamax.refmap.json")
-    }
+    }*/
     runConfigs {
         "client" {
             if (SystemUtils.IS_OS_MAC_OSX) {
@@ -180,8 +180,8 @@ tasks.withType(Jar::class) {
         this["FMLCorePluginContainsFMLMod"] = "true"
         this["ForceLoadAsMod"] = "true"
 
-        this["TweakClass"] = "org.spongepowered.asm.launch.MixinTweaker"
-        this["MixinConfigs"] = "mixins.cyclamax.json"
+        //this["TweakClass"] = "org.spongepowered.asm.launch.MixinTweaker"
+        //this["MixinConfigs"] = "mixins.cyclamax.json"
     }
 }
 
