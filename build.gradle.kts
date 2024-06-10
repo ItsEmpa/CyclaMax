@@ -14,7 +14,7 @@ plugins {
 }
 
 group = "com.github.itsempa.cyclamax"
-version = "0.0.1"
+version = "0.0.2"
 
 val gitHash by lazy {
     val baos = ByteArrayOutputStream()
