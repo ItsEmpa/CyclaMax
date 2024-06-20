@@ -20,4 +20,8 @@ public class Features extends Config {
     @Expose
     @Category(name = "Cycla Box", desc = "")
     public CyclaBoxConfig cyclaBox = new CyclaBoxConfig();
+
+    @Expose
+    @Category(name = "Vampire Mask", desc = "")
+    public VampireMaskConfig vampireMask = new VampireMaskConfig();
 }

@@ -1,4 +1,4 @@
-package com.github.itsempa.cyclamax.features.cyclabox
+package com.github.itsempa.cyclamax.features
 
 import at.hannibal2.skyhanni.data.IslandType
 import at.hannibal2.skyhanni.events.LorenzRenderWorldEvent
@@ -20,7 +20,6 @@ class CyclaBox {
 
     @SubscribeEvent
     fun onEntityJoinWorld(event: EntityJoinWorldEvent) {
-        if (!isEnabled()) return
         val entity = event.entity as? EntityMooshroom ?: return
         entities += entity
     }
