@@ -2,10 +2,12 @@ package com.github.itsempa.cyclamax
 
 import at.hannibal2.skyhanni.events.SecondPassedEvent
 import com.github.itsempa.cyclamax.commands.ConfigCommand
+import com.github.itsempa.cyclamax.commands.SpinCommand
 import com.github.itsempa.cyclamax.config.categories.Features
 import com.github.itsempa.cyclamax.features.CyclaBox
 import com.github.itsempa.cyclamax.features.VampireMask
 import io.github.notenoughupdates.moulconfig.managed.ManagedConfig
+import net.minecraft.command.ICommand
 import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Loader
@@ -26,7 +28,9 @@ class CyclaMax {
     fun init(event: FMLInitializationEvent) {
         loadModule(CyclaBox())
         loadModule(VampireMask())
-        ClientCommandHandler.instance.registerCommand(ConfigCommand)
+
+        loadCommand(SpinCommand)
+        loadCommand(ConfigCommand)
     }
 
     @SubscribeEvent
@@ -40,6 +44,10 @@ class CyclaMax {
         MinecraftForge.EVENT_BUS.register(obj)
     }
 
+    private fun loadCommand(obj: ICommand) {
+        ClientCommandHandler.instance.registerCommand(obj)
+    }
+
     companion object {
         const val MOD_ID = "cyclamax"
 
@@ -48,6 +56,6 @@ class CyclaMax {
             get() = Loader.instance().indexedModList[MOD_ID]!!.version
 
         val managedConfig by lazy { ManagedConfig.create(File("config/cyclamax/config.json"), Features::class.java) }
-        val config = managedConfig.instance
+        val config get() = managedConfig.instance
     }
 }

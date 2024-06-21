@@ -24,4 +24,8 @@ public class Features extends Config {
     @Expose
     @Category(name = "Vampire Mask", desc = "")
     public VampireMaskConfig vampireMask = new VampireMaskConfig();
+
+    @Expose
+    @Category(name = "Misc", desc = "")
+    public MiscConfig misc = new MiscConfig();
 }

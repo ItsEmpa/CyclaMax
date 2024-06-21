@@ -1,0 +1,9 @@
+{
+  "package": "com.github.itsempa.cyclamax.mixins.transformers",
+  "refmap": "mixins.cyclamax.refmap.json",
+  "plugin": "com.github.itsempa.cyclamax.mixins.init.CyclaMaxMixinPlugin",
+  "compatibilityLevel": "JAVA_8",
+  "injectors": {
+    "maxShiftBy": 2
+  }
+}
