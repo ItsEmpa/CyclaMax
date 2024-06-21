@@ -9,12 +9,20 @@ object SpinnyHook {
     private val config get() = CyclaMax.config.misc
 
     @JvmStatic
-    fun rotatePlayer(player: EntityPlayer) {
+    fun rotatePlayer(
+        player: EntityPlayer,
+        partialTicks: Float) {
         if (!config.spin) return
         val name = player.name ?: return
         if (name != LorenzUtils.getPlayerName()) return
-        val speed = 20 * (config.spinSpeed / 100.0)
-        val rotation = ((player.ticksExisted % 90) * speed).toFloat()
+        val spinsPerMinute = config.spinSpeed
+        val spinsPerSecond = spinsPerMinute / 60.0
+        val degreesPerSecond = spinsPerSecond * 360.0
+        val degreesPerTick = degreesPerSecond / 20.0
+
+        val ticksExisted = player.ticksExisted + partialTicks
+
+        val rotation = (ticksExisted * degreesPerTick).toFloat() % 360 + 180
         GlStateManager.rotate(rotation, 0f, 1f, 0f)
     }
 }

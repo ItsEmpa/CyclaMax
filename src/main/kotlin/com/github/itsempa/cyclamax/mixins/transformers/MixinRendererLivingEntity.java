@@ -15,7 +15,7 @@ public class MixinRendererLivingEntity<T extends EntityLivingBase> {
     @Inject(method = "rotateCorpse", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/EnumChatFormatting;getTextWithoutFormattingCodes(Ljava/lang/String;)Ljava/lang/String;", shift = At.Shift.AFTER))
     private void rotateThePlayer(T bat, float p_77043_2_, float p_77043_3_, float partialTicks, CallbackInfo ci) {
         if (bat instanceof EntityPlayer) {
-            SpinnyHook.rotatePlayer((EntityPlayer) bat);
+            SpinnyHook.rotatePlayer((EntityPlayer) bat, partialTicks);
         }
     }
 

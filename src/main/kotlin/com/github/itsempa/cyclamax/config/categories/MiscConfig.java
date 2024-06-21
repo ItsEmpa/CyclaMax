@@ -14,7 +14,7 @@ public class MiscConfig {
 
     @Expose
     @ConfigOption(name = "Spin Speed", desc = "How fast you spin")
-    @ConfigEditorSlider(minValue = 1, minStep = 1, maxValue = 100)
+    @ConfigEditorSlider(minValue = -100, minStep = 1, maxValue = 100)
     public int spinSpeed = 50;
 
 }
