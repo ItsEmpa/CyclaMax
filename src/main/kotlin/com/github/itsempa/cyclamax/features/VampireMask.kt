@@ -19,7 +19,7 @@ class VampireMask {
         val mob = event.mob
         if (mob.name == "Vampire Mask Bat") {
             bats += mob
-            if (config.highlight) mob.highlight(LorenzColor.LIGHT_PURPLE.toColor())
+            if (config.highlight) mob.highlight(LorenzColor.RED.addOpacity(100))
         }
     }
 

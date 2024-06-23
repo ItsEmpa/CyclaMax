@@ -13,6 +13,11 @@ public class CyclaBoxConfig {
     public boolean enabled = true;
 
     @Expose
+    @ConfigOption(name = "Line to nearest", desc = "shows a line to the nearest visible funny cow")
+    @ConfigEditorBoolean
+    public boolean lineToNearest = false;
+
+    @Expose
     @ConfigOption(name = "Sphere color", desc = "coloUr of sphere")
     @ConfigEditorColour
     public String color = "0:100:255:85:255";
