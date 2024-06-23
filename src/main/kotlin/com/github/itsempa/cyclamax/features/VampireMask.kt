@@ -3,6 +3,7 @@ package com.github.itsempa.cyclamax.features
 import at.hannibal2.skyhanni.data.mob.Mob
 import at.hannibal2.skyhanni.events.GuiRenderEvent
 import at.hannibal2.skyhanni.events.MobEvent
+import at.hannibal2.skyhanni.utils.LorenzColor
 import at.hannibal2.skyhanni.utils.LorenzUtils
 import at.hannibal2.skyhanni.utils.RenderUtils.renderString
 import com.github.itsempa.cyclamax.CyclaMax
@@ -15,7 +16,11 @@ class VampireMask {
 
     @SubscribeEvent
     fun onMobSpawn(event: MobEvent.Spawn.Projectile) {
-        if (event.mob.name == "Vampire Mask Bat") bats += event.mob
+        val mob = event.mob
+        if (mob.name == "Vampire Mask Bat") {
+            bats += mob
+            if (config.highlight) mob.highlight(LorenzColor.LIGHT_PURPLE.toColor())
+        }
     }
 
     @SubscribeEvent

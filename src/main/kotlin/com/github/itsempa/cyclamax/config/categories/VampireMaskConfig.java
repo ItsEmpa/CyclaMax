@@ -18,6 +18,14 @@ public class VampireMaskConfig {
     public boolean enabled = true;
 
     @Expose
+    @ConfigOption(
+            name = "Highlight Bats",
+            desc = "yeah idk, it just highlights bats from vamp mask"
+    )
+    @ConfigEditorBoolean
+    public boolean highlight = false;
+
+    @Expose
     @ConfigLink(owner = VampireMaskConfig.class, field = "enabled")
     public Position position = new Position(260, -15);
 
