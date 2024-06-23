@@ -20,7 +20,7 @@ import java.io.File
     modid = CyclaMax.MOD_ID,
     clientSideOnly = true,
     useMetadata = true,
-    version = "0.0.4",
+    version = "0.0.5",
 )
 class CyclaMax {
 
