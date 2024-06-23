@@ -8,11 +8,6 @@ import io.github.notenoughupdates.moulconfig.annotations.ConfigOption;
 public class MiscConfig {
 
     @Expose
-    @ConfigOption(name = "Auto Updates", desc = "Automatically notify of new updates.")
-    @ConfigEditorBoolean
-    public boolean autoUpdates = true;
-
-    @Expose
     @ConfigOption(name = "Spin", desc = "weeeeeeee")
     @ConfigEditorBoolean
     public boolean spin = false;

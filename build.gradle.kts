@@ -14,7 +14,7 @@ plugins {
 }
 
 group = "com.github.itsempa.cyclamax"
-version = "0.0.5"
+version = "0.0.4"
 
 val gitHash by lazy {
     val baos = ByteArrayOutputStream()
@@ -113,9 +113,6 @@ dependencies {
     }
 
     shadowModImpl(libs.moulconfig)
-    shadowImpl(libs.libautoupdate) {
-        exclude(module = "gson")
-    }
     shadowImpl("org.jetbrains.kotlin:kotlin-reflect:1.9.0")
 }
 
@@ -206,7 +203,6 @@ tasks.shadowJar {
     exclude("META-INF/versions/**")
     mergeServiceFiles()
     relocate("io.github.notenoughupdates.moulconfig", "com.github.itsempa.cyclamax.deps.moulconfig")
-    relocate("moe.nea.libautoupdate", "com.github.itsempa.cyclamax.deps.libautoupdate")
 }
 
 tasks.jar {

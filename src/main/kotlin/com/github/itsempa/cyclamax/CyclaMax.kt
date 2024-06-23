@@ -4,7 +4,6 @@ import at.hannibal2.skyhanni.events.SecondPassedEvent
 import com.github.itsempa.cyclamax.commands.ConfigCommand
 import com.github.itsempa.cyclamax.commands.SpinCommand
 import com.github.itsempa.cyclamax.config.categories.Features
-import com.github.itsempa.cyclamax.features.AutoUpdate
 import com.github.itsempa.cyclamax.features.CyclaBox
 import com.github.itsempa.cyclamax.features.VampireMask
 import io.github.notenoughupdates.moulconfig.managed.ManagedConfig
@@ -21,7 +20,7 @@ import java.io.File
     modid = CyclaMax.MOD_ID,
     clientSideOnly = true,
     useMetadata = true,
-    version = "0.0.5",
+    version = "0.0.4",
 )
 class CyclaMax {
 
@@ -29,7 +28,6 @@ class CyclaMax {
     fun init(event: FMLInitializationEvent) {
         loadModule(CyclaBox())
         loadModule(VampireMask())
-        loadModule(AutoUpdate())
 
         loadCommand(SpinCommand)
         loadCommand(ConfigCommand)
