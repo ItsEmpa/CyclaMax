@@ -56,6 +56,8 @@ class CyclaMax {
             get() = Loader.instance().indexedModList[MOD_ID]!!.version
 
         val managedConfig by lazy { ManagedConfig.create(File("config/cyclamax/config.json"), Features::class.java) }
+
+        @JvmStatic
         val config get() = managedConfig.instance
     }
 }

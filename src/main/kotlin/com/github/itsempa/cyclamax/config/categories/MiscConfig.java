@@ -17,4 +17,9 @@ public class MiscConfig {
     @ConfigEditorSlider(minValue = -100, minStep = 1, maxValue = 100)
     public int spinSpeed = 50;
 
+    @Expose
+    @ConfigOption(name = "Stop Sword Blocking", desc = "makes it so that you dont get the block sword animation")
+    @ConfigEditorBoolean
+    public boolean stopSwordBlocking = false;
+
 }
