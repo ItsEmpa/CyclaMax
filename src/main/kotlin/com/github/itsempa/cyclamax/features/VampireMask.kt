@@ -2,6 +2,7 @@ package com.github.itsempa.cyclamax.features
 
 import at.hannibal2.skyhanni.data.mob.Mob
 import at.hannibal2.skyhanni.events.GuiRenderEvent
+import at.hannibal2.skyhanni.events.LorenzTickEvent
 import at.hannibal2.skyhanni.events.MobEvent
 import at.hannibal2.skyhanni.utils.LorenzColor
 import at.hannibal2.skyhanni.utils.LorenzUtils
@@ -18,7 +19,7 @@ object VampireMask {
 
     val batDeathLocations = TimeLimitedSet<LorenzVec>(2.seconds)
 
-    private val bats = mutableSetOf<Mob>()
+    private var bats = mutableSetOf<Mob>()
 
     @SubscribeEvent
     fun onMobSpawn(event: MobEvent.Spawn.Projectile) {
@@ -30,12 +31,16 @@ object VampireMask {
     }
 
     @SubscribeEvent
-    fun onMobDeSpawn(event: MobEvent.DeSpawn.Projectile) {
-        val mob = event.mob
-        if (mob in bats) {
-            bats -= mob
-            batDeathLocations += mob.baseEntity.getLorenzVec()
-        }
+    fun onTick(event: LorenzTickEvent) {
+        if (!isEnabled()) return
+        bats = bats.filter {
+            if (it.baseEntity.isDead || it.baseEntity.health == 0F) {
+                val pos = it.baseEntity.getLorenzVec()
+                batDeathLocations += pos
+                KillsCounter.handleBatDeath(pos)
+                false
+            } else true
+        }.toMutableSet()
     }
 
     @SubscribeEvent

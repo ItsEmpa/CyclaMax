@@ -21,6 +21,7 @@ import at.hannibal2.skyhanni.utils.LorenzUtils.isInIsland
 import at.hannibal2.skyhanni.utils.LorenzVec
 import at.hannibal2.skyhanni.utils.NEUInternalName
 import at.hannibal2.skyhanni.utils.NEUInternalName.Companion.asInternalName
+import at.hannibal2.skyhanni.utils.NumberUtil.addSeparators
 import at.hannibal2.skyhanni.utils.NumberUtil.formatLong
 import at.hannibal2.skyhanni.utils.RecalculatingValue
 import at.hannibal2.skyhanni.utils.RegexUtils.firstMatcher
@@ -70,6 +71,8 @@ object KillsCounter {
 
     private val recentlyLookedMobs = TimeLimitedSet<EntityMooshroom>(2.seconds)
 
+    private val recentlyDeadNotOwn = TimeLimitedSet<EntityMooshroom>(2.seconds)
+
     private var lastWitherBladeUse = SimpleTimeMark.farPast()
     private var lastSneak = SimpleTimeMark.farPast()
     private var lastLeftClick = SimpleTimeMark.farPast()
@@ -83,7 +86,7 @@ object KillsCounter {
         }
 
     @SubscribeEvent
-    fun onRenderOverlay(event: GuiRenderEvent.GuiOverlayRenderEvent) {
+    fun onRenderOverlay(event: GuiRenderEvent) {
         if (!isEnabled()) return
         val renderable = display ?: return
         config.position.renderRenderable(renderable, "Kills Counter")
@@ -134,17 +137,30 @@ object KillsCounter {
         }?.let { item ->
             bestiaryKillsPattern.firstMatcher(item.getLore()) {
                 kills = group("kills").formatLong()
+                update()
             }
         }
     }
 
     private fun addKill(): Boolean {
         kills++
-        display = Renderable.link("§aKills: §b${kills}") {
-            @Suppress("DEPRECATION")
-            ChatUtils.sendCommandToServer("be mushroom cow")
-        }
+        update()
         return true
+    }
+
+    private fun update() {
+        val stringRenderable = Renderable.string("§aKills: §b${kills.addSeparators()}")
+        display = Renderable.clickAndHover(
+            Renderable.hoverable(
+                Renderable.underlined(stringRenderable),
+                stringRenderable,
+            ),
+            tips = listOf("§bClick to update!"),
+            onClick = {
+                @Suppress("DEPRECATION")
+                ChatUtils.sendCommandToServer("be mushroom cow")
+            },
+        )
     }
 
     fun killMushroom(entity: EntityMooshroom) {
@@ -153,10 +169,13 @@ object KillsCounter {
         if (handlePrecursorEye(entity)) return
         if (handleMelee(entity, pos)) return
         if (handleWitherBlade(pos)) return
+        recentlyDeadNotOwn += entity
     }
 
     private fun handleWitchMask(pos: LorenzVec): Boolean {
-        if (VampireMask.batDeathLocations.none { it.distance(pos) < 5.0 }) return false
+        val locations = runCatching { VampireMask.batDeathLocations.toSet() }.getOrNull() ?: return false
+        if (locations.isEmpty()) return false
+        if (locations.none { it.distance(pos) < 5.0 }) return false
         return addKill()
     }
 
@@ -213,6 +232,14 @@ object KillsCounter {
             )
         }
         return possibleEntities.minByOrNull { it.distanceTo(pos) }
+    }
+
+    fun handleBatDeath(pos: LorenzVec) {
+        val locations = runCatching { recentlyDeadNotOwn.toSet() }.getOrNull() ?: return
+        val cow = locations.minByOrNull { it.distanceTo(pos) } ?: return
+        if (cow.distanceTo(pos) > 5) return
+        recentlyDeadNotOwn -= cow
+        addKill()
     }
 
     private fun isEnabled() = IslandType.THE_FARMING_ISLANDS.isInIsland() && config.enabled
