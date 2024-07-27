@@ -5,12 +5,18 @@ import at.hannibal2.skyhanni.events.GuiRenderEvent
 import at.hannibal2.skyhanni.events.MobEvent
 import at.hannibal2.skyhanni.utils.LorenzColor
 import at.hannibal2.skyhanni.utils.LorenzUtils
+import at.hannibal2.skyhanni.utils.LorenzVec
 import at.hannibal2.skyhanni.utils.RenderUtils.renderString
+import at.hannibal2.skyhanni.utils.TimeLimitedSet
+import at.hannibal2.skyhanni.utils.getLorenzVec
 import com.github.itsempa.cyclamax.CyclaMax
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import kotlin.time.Duration.Companion.seconds
 
-class VampireMask {
+object VampireMask {
     private val config get() = CyclaMax.config.vampireMask
+
+    val batDeathLocations = TimeLimitedSet<LorenzVec>(2.seconds)
 
     private val bats = mutableSetOf<Mob>()
 
@@ -25,7 +31,11 @@ class VampireMask {
 
     @SubscribeEvent
     fun onMobDeSpawn(event: MobEvent.DeSpawn.Projectile) {
-        bats -= event.mob
+        val mob = event.mob
+        if (mob in bats) {
+            bats -= mob
+            batDeathLocations += mob.baseEntity.getLorenzVec()
+        }
     }
 
     @SubscribeEvent

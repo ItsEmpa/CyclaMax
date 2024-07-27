@@ -2,8 +2,8 @@ package com.github.itsempa.cyclamax.features
 
 import at.hannibal2.skyhanni.data.IslandType
 import at.hannibal2.skyhanni.events.LorenzRenderWorldEvent
+import at.hannibal2.skyhanni.events.LorenzTickEvent
 import at.hannibal2.skyhanni.events.LorenzWorldChangeEvent
-import at.hannibal2.skyhanni.events.SecondPassedEvent
 import at.hannibal2.skyhanni.utils.ColorUtils.addAlpha
 import at.hannibal2.skyhanni.utils.ColorUtils.toChromaColor
 import at.hannibal2.skyhanni.utils.EntityUtils.canBeSeen
@@ -18,10 +18,10 @@ import net.minecraft.entity.passive.EntityMooshroom
 import net.minecraftforge.event.entity.EntityJoinWorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
-class CyclaBox {
+object CyclaBox {
     private val config get() = CyclaMax.config.cyclaBox
 
-    private val entities = mutableSetOf<EntityMooshroom>()
+    private var entities = mutableSetOf<EntityMooshroom>()
 
     @SubscribeEvent
     fun onEntityJoinWorld(event: EntityJoinWorldEvent) {
@@ -30,14 +30,20 @@ class CyclaBox {
     }
 
     @SubscribeEvent
-    fun onSecondPassed(event: SecondPassedEvent) {
-        if (!isEnabled()) return
-        entities.removeIf { it.isDead }
+    fun onWorldChange(event: LorenzWorldChangeEvent) {
+        entities.clear()
     }
 
     @SubscribeEvent
-    fun onWorldChange(event: LorenzWorldChangeEvent) {
-        entities.clear()
+    fun onTick(event: LorenzTickEvent) {
+        if (!isEnabled()) return
+        entities = entities.filter {
+            if (it.isDead || it.health == 0F) {
+                // TODO: make an event
+                KillsCounter.killMushroom(it)
+                false
+            } else true
+        }.toMutableSet()
     }
 
     @SubscribeEvent

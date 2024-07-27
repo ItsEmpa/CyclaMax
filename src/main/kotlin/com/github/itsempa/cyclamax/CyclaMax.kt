@@ -5,6 +5,7 @@ import com.github.itsempa.cyclamax.commands.ConfigCommand
 import com.github.itsempa.cyclamax.commands.SpinCommand
 import com.github.itsempa.cyclamax.config.categories.Features
 import com.github.itsempa.cyclamax.features.CyclaBox
+import com.github.itsempa.cyclamax.features.KillsCounter
 import com.github.itsempa.cyclamax.features.VampireMask
 import io.github.notenoughupdates.moulconfig.managed.ManagedConfig
 import net.minecraft.command.ICommand
@@ -26,8 +27,9 @@ class CyclaMax {
 
     @Mod.EventHandler
     fun init(event: FMLInitializationEvent) {
-        loadModule(CyclaBox())
-        loadModule(VampireMask())
+        loadModule(CyclaBox)
+        loadModule(VampireMask)
+        loadModule(KillsCounter)
 
         loadCommand(SpinCommand)
         loadCommand(ConfigCommand)
