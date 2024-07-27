@@ -17,7 +17,6 @@ import at.hannibal2.skyhanni.utils.ItemUtils.name
 import at.hannibal2.skyhanni.utils.LocationUtils
 import at.hannibal2.skyhanni.utils.LocationUtils.distanceTo
 import at.hannibal2.skyhanni.utils.LocationUtils.rayIntersects
-import at.hannibal2.skyhanni.utils.LorenzUtils
 import at.hannibal2.skyhanni.utils.LorenzUtils.isInIsland
 import at.hannibal2.skyhanni.utils.LorenzVec
 import at.hannibal2.skyhanni.utils.NEUInternalName
@@ -25,6 +24,7 @@ import at.hannibal2.skyhanni.utils.NEUInternalName.Companion.asInternalName
 import at.hannibal2.skyhanni.utils.NumberUtil.formatLong
 import at.hannibal2.skyhanni.utils.RecalculatingValue
 import at.hannibal2.skyhanni.utils.RegexUtils.firstMatcher
+import at.hannibal2.skyhanni.utils.RenderUtils.exactPlayerEyeLocation
 import at.hannibal2.skyhanni.utils.RenderUtils.renderRenderable
 import at.hannibal2.skyhanni.utils.SimpleTimeMark
 import at.hannibal2.skyhanni.utils.StringUtils.removeColor
@@ -34,7 +34,6 @@ import at.hannibal2.skyhanni.utils.renderables.Renderable
 import at.hannibal2.skyhanni.utils.toLorenzVec
 import com.github.itsempa.cyclamax.CyclaMax
 import net.minecraft.client.Minecraft
-import net.minecraft.entity.Entity
 import net.minecraft.entity.passive.EntityMooshroom
 import net.minecraft.item.ItemStack
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -54,14 +53,10 @@ object KillsCounter {
         ).map { it.asInternalName() }.toSet()
     }
 
-    private val bestiaryKillsPattern by lazy {
-        "§7Kills: §a(?<kills>[\\d,.]+)".toPattern()
-    }
+    private val bestiaryKillsPattern = "§7Kills: §a(?<kills>[\\d,.]+)".toPattern()
 
     private const val BESTIARY_SKULL =
         "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmI1Mjg0MWYyZmQ1ODllMGJjODRjYmFiZjllMWMyN2NiNzBjYWM5OGY4ZDZiM2RkMDY1ZTU1YTRkY2I3MGQ3NyJ9fX0="
-
-    private const val FARM_MUSHROOM = "Farm Mooshroom"
 
     private fun NEUInternalName.isWitherBlade() = this in witherBlades
 
@@ -96,14 +91,14 @@ object KillsCounter {
 
     @SubscribeEvent
     fun onRenderWorld(event: LorenzRenderWorldEvent) {
-        if (!inLocation()) return
-        val cow = rayTraceMooshroom(Minecraft.getMinecraft().thePlayer, event.partialTicks) ?: return
+        if (!IslandType.THE_FARMING_ISLANDS.isInIsland()) return
+        val cow = event.rayTraceMooshroom() ?: return
         recentlyLookedMobs += cow
     }
 
     @SubscribeEvent
     fun onTick(event: LorenzTickEvent) {
-        if (!inLocation()) return
+        if (!IslandType.THE_FARMING_ISLANDS.isInIsland()) return
         val player = Minecraft.getMinecraft().thePlayer
         recentPositions += player.getLorenzVec()
         if (player.isSneaking) {
@@ -113,7 +108,7 @@ object KillsCounter {
 
     @SubscribeEvent
     fun onItemUse(event: ItemClickEvent) {
-        if (!inLocation()) return
+        if (!IslandType.THE_FARMING_ISLANDS.isInIsland()) return
         val item = event.itemInHand ?: return
         when (event.clickType) {
             ClickType.RIGHT_CLICK -> {
@@ -184,9 +179,7 @@ object KillsCounter {
         return addKill()
     }
 
-    private val bestiaryTitlePattern by lazy {
-        "^(?:\\(\\d+/\\d+\\) )?(Bestiary|.+) ➜ (.+)\$".toPattern()
-    }
+    private val bestiaryTitlePattern = "^(?:\\(\\d+/\\d+\\) )?(Bestiary|.+) ➜ (.+)\$".toPattern()
 
     /**
      * Taken and modified from SkyHanni
@@ -211,9 +204,9 @@ object KillsCounter {
         return false
     }
 
-    private fun rayTraceMooshroom(entity: Entity, partialTicks: Float, offset: LorenzVec = LorenzVec()): EntityMooshroom? {
-        val pos = entity.getPositionEyes(partialTicks).toLorenzVec() + offset
-        val look = entity.getLook(partialTicks).toLorenzVec().normalize()
+    private fun LorenzRenderWorldEvent.rayTraceMooshroom(): EntityMooshroom? {
+        val pos = exactPlayerEyeLocation()
+        val look = Minecraft.getMinecraft().thePlayer.getLook(partialTicks).toLorenzVec().normalize()
         val possibleEntities = getEntities<EntityMooshroom>().filter {
             it.entityBoundingBox.rayIntersects(
                 pos, look,
@@ -222,8 +215,6 @@ object KillsCounter {
         return possibleEntities.minByOrNull { it.distanceTo(pos) }
     }
 
-    private fun inLocation() = LorenzUtils.inSkyBlock && IslandType.THE_FARMING_ISLANDS.isInIsland()
-
-    private fun isEnabled() = inLocation() && config.enabled
+    private fun isEnabled() = IslandType.THE_FARMING_ISLANDS.isInIsland() && config.enabled
 
 }
