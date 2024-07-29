@@ -27,6 +27,7 @@ class CyclaMax {
 
     @Mod.EventHandler
     fun init(event: FMLInitializationEvent) {
+        loadModule(this)
         loadModule(CyclaBox)
         loadModule(VampireMask)
         loadModule(KillsCounter)
