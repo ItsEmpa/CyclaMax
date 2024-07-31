@@ -22,4 +22,8 @@ public class MiscConfig {
     @ConfigEditorBoolean
     public boolean stopSwordBlocking = false;
 
+    @Expose
+    @ConfigOption(name = "Remove Armor Enchant Glint", desc = "removes enchant glint only from armor (worn or in item form)")
+    @ConfigEditorBoolean
+    public boolean removeArmorGlint = false;
 }
