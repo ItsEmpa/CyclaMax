@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinRenderItem {
 
     @Unique
-    private static ItemStack cyclamax$lastRenderedItem = null;
+    private ItemStack cyclamax$lastRenderedItem = null;
 
     @Inject(
             method = "renderItem(Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/resources/model/IBakedModel;)V",
@@ -26,7 +26,7 @@ public class MixinRenderItem {
 
     @Inject(method = "renderEffect", at = @At("HEAD"), cancellable = true)
     private void onRenderEffect(IBakedModel model, CallbackInfo ci) {
-        if (ArmorGlintHook.INSTANCE.shouldHideGlint(cyclamax$lastRenderedItem)) {
+        if (ArmorGlintHook.shouldHideGlint(cyclamax$lastRenderedItem)) {
             ci.cancel();
         }
     }

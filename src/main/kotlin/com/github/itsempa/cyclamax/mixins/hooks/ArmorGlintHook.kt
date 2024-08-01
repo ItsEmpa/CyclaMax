@@ -7,6 +7,7 @@ import net.minecraft.item.ItemStack
 object ArmorGlintHook {
     private val config get() = CyclaMax.config.misc
 
+    @JvmStatic
     fun shouldHideGlint(item: ItemStack?): Boolean {
         if (!config.removeArmorGlint) return false
         return item?.item is ItemArmor
