@@ -26,6 +26,10 @@ public class Features extends Config {
     public VampireMaskConfig vampireMask = new VampireMaskConfig();
 
     @Expose
+    @Category(name = "Kills Counter", desc = "")
+    public KillsConfig killsCounter = new KillsConfig();
+
+    @Expose
     @Category(name = "Misc", desc = "")
     public MiscConfig misc = new MiscConfig();
 }

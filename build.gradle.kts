@@ -103,11 +103,11 @@ dependencies {
         isTransitive = false
     }
 
-    modCompileOnly("com.github.hannibal002:SkyHanni:0.26.Beta.16:") {
+    modCompileOnly("com.github.hannibal002:SkyHanni:0.26.Beta.18:") {
         exclude(group = "null", module = "unspecified")
         isTransitive = false
     }
-    devenvMod("com.github.hannibal002:SkyHanni:0.26.Beta.16:") {
+    devenvMod("com.github.hannibal002:SkyHanni:0.26.Beta.18:") {
         exclude(group = "null", module = "unspecified")
         isTransitive = false
     }
