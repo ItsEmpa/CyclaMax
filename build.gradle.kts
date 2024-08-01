@@ -14,7 +14,7 @@ plugins {
 }
 
 group = "com.github.itsempa.cyclamax"
-version = "0.0.6"
+version = "0.0.7"
 
 val gitHash by lazy {
     val baos = ByteArrayOutputStream()
@@ -103,11 +103,11 @@ dependencies {
         isTransitive = false
     }
 
-    modCompileOnly("com.github.hannibal002:SkyHanni:0.26.Beta.18:") {
+    modCompileOnly("com.github.hannibal002:SkyHanni:0.26.Beta.20:") {
         exclude(group = "null", module = "unspecified")
         isTransitive = false
     }
-    devenvMod("com.github.hannibal002:SkyHanni:0.26.Beta.18:") {
+    devenvMod("com.github.hannibal002:SkyHanni:0.26.Beta.20:") {
         exclude(group = "null", module = "unspecified")
         isTransitive = false
     }
