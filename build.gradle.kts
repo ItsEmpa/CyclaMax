@@ -8,13 +8,25 @@ plugins {
     id("gg.essential.loom") version "0.10.0.+"
     id("dev.architectury.architectury-pack200") version "0.1.3"
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    kotlin("jvm") version "1.9.0"
+    kotlin("jvm") version "2.0.0"
     kotlin("plugin.serialization") version "1.8.0"
     id("com.bnorm.power.kotlin-power-assert") version "0.13.0"
+    id("net.kyori.blossom") version "1.3.2"
+    id("com.google.devtools.ksp") version "2.0.20-1.0.25"
 }
 
-group = "com.github.itsempa.cyclamax"
-version = "0.0.7"
+//Constants:
+val modName: String by project
+val modVersion: String by project
+val modid: String by project
+val skyhanniVersion: String by project
+val baseGroup: String by project
+
+blossom {
+    replaceToken("@MOD_VER@", modVersion)
+    replaceToken("@MOD_NAME@", modName)
+    replaceToken("@MOD_ID@", modid)
+}
 
 val gitHash by lazy {
     val baos = ByteArrayOutputStream()
@@ -79,41 +91,36 @@ dependencies {
     mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
 
-    implementation(kotlin("stdlib-jdk8"))
+    compileOnly(libs.jbAnnotations)
     headlessLwjgl(libs.headlessLwjgl)
+    /* Uncomment if you want to make an auto updater
+    shadowImpl(libs.libautoupdate) {
+        exclude(module = "gson")
+    }
+    */
 
-    // If you don't want mixins, remove these lines
+    compileOnly(ksp(project("annotations"))!!)
 
     shadowImpl("org.spongepowered:mixin:0.7.11-SNAPSHOT") {
         isTransitive = false
     }
     annotationProcessor("org.spongepowered:mixin:0.8.4-SNAPSHOT")
 
-    implementation(kotlin("stdlib-jdk8"))
-
     // If you don't want to log in with your real minecraft account, remove this line
     runtimeOnly("me.djtheredstoner:DevAuth-forge-legacy:1.1.2")
 
-    modCompileOnly("com.github.hannibal002:notenoughupdates:4957f0b:all") {
-        exclude(module = "unspecified")
-        isTransitive = false
-    }
-    devenvMod("com.github.NotEnoughUpdates:NotEnoughUpdates:2.2.2:all") {
-        exclude(module = "unspecified")
-        isTransitive = false
-    }
-
-    modCompileOnly("com.github.hannibal002:SkyHanni:0.26.Beta.20:") {
+    modCompileOnly(libs.skyhanni) {
         exclude(group = "null", module = "unspecified")
         isTransitive = false
     }
-    devenvMod("com.github.hannibal002:SkyHanni:0.26.Beta.20:") {
+    devenvMod(libs.skyhanni) {
         exclude(group = "null", module = "unspecified")
         isTransitive = false
     }
+}
 
-    shadowModImpl(libs.moulconfig)
-    shadowImpl("org.jetbrains.kotlin:kotlin-reflect:1.9.0")
+ksp {
+    arg("symbolProcessor", "$baseGroup.modules.ModuleProvider")
 }
 
 kotlin {
@@ -123,6 +130,9 @@ kotlin {
             enableLanguageFeature("BreakContinueInInlineLambdas")
         }
     }
+    sourceSets.main {
+        kotlin.srcDirs("build/generated/ksp/main/kotlin")
+    }
 }
 
 // Minecraft configuration:
@@ -130,19 +140,23 @@ loom {
     launchConfigs {
         "client" {
             property("mixin.debug", "true")
+
+            // Needed to prevent moulconfig from crashing when a config file is done in kotlin
+            property("moulconfig.warn", "false")
+            property("moulconfig.warn.crash", "false")
+
             property("devauth.configDir", rootProject.file(".devauth").absolutePath)
             arg("--tweakClass", "org.spongepowered.asm.launch.MixinTweaker")
-            arg("--tweakClass", "io.github.notenoughupdates.moulconfig.tweaker.DevelopmentResourceTweaker")
             arg("--mods", devenvMod.resolve().joinToString(",") { it.relativeTo(file("run")).path })
         }
     }
     forge {
         pack200Provider.set(dev.architectury.pack200.java.Pack200Adapter())
-        mixinConfig("mixins.cyclamax.json")
+        mixinConfig("mixins.$modid.json")
     }
     @Suppress("UnstableApiUsage")
     mixin {
-        defaultRefmapName.set("mixins.cyclamax.refmap.json")
+        defaultRefmapName.set("mixins.$modid.refmap.json")
     }
     runConfigs {
         "client" {
@@ -158,9 +172,12 @@ loom {
 }
 
 tasks.processResources {
-    inputs.property("version", version)
-    filesMatching("mcmod.info") {
-        expand("version" to version)
+    inputs.property("modid", modid)
+    inputs.property("modname", modName)
+    inputs.property("version", modVersion)
+    inputs.property("basePackage", baseGroup)
+    filesMatching(listOf("mcmod.info", "mixins.$modid.json")) {
+        expand(inputs.properties)
     }
 }
 
@@ -173,15 +190,15 @@ tasks.withType(JavaCompile::class) {
 }
 
 
-tasks.withType(Jar::class) {
+tasks.jar {
     destinationDirectory.set(project.layout.buildDirectory.dir("badjars"))
-    archiveBaseName.set("CyclaMax")
+    archiveBaseName.set(modName)
     manifest.attributes.run {
         this["FMLCorePluginContainsFMLMod"] = "true"
         this["ForceLoadAsMod"] = "true"
 
         this["TweakClass"] = "org.spongepowered.asm.launch.MixinTweaker"
-        this["MixinConfigs"] = "mixins.cyclamax.json"
+        this["MixinConfigs"] = "mixins.$modid.json"
     }
 }
 
@@ -202,7 +219,6 @@ tasks.shadowJar {
     }
     exclude("META-INF/versions/**")
     mergeServiceFiles()
-    relocate("io.github.notenoughupdates.moulconfig", "com.github.itsempa.cyclamax.deps.moulconfig")
 }
 
 tasks.jar {

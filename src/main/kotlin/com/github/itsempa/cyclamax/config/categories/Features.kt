@@ -1,35 +1,33 @@
-package com.github.itsempa.cyclamax.config.categories;
+package com.github.itsempa.cyclamax.config.categories
 
-import com.github.itsempa.cyclamax.CyclaMax;
-import com.google.gson.annotations.Expose;
-import io.github.notenoughupdates.moulconfig.Config;
-import io.github.notenoughupdates.moulconfig.annotations.Category;
+import at.hannibal2.skyhanni.deps.moulconfig.Config
+import at.hannibal2.skyhanni.deps.moulconfig.annotations.Category
+import com.github.itsempa.cyclamax.CyclaMax
+import com.github.itsempa.cyclamax.CyclaMax.managedConfig
+import com.google.gson.annotations.Expose
 
-public class Features extends Config {
+class Features : Config() {
+    override fun getTitle(): String = "CyclaMax ${CyclaMax.VERSION} by §cEmpa"
 
-    @Override
-    public String getTitle() {
-        return "CyclaMax " + CyclaMax.getVersion() + " by §cEmpa";
+    override fun saveNow() {
+        managedConfig.saveToFile()
     }
 
-    @Override
-    public void saveNow() {
-        CyclaMax.Companion.getManagedConfig().saveToFile();
-    }
+    override fun shouldAutoFocusSearchbar(): Boolean = true
 
     @Expose
     @Category(name = "Cycla Box", desc = "")
-    public CyclaBoxConfig cyclaBox = new CyclaBoxConfig();
+    var cyclaBox: CyclaBoxConfig = CyclaBoxConfig()
 
     @Expose
     @Category(name = "Vampire Mask", desc = "")
-    public VampireMaskConfig vampireMask = new VampireMaskConfig();
+    var vampireMask: VampireMaskConfig = VampireMaskConfig()
 
     @Expose
     @Category(name = "Kills Counter", desc = "")
-    public KillsConfig killsCounter = new KillsConfig();
+    var killsCounter: KillsConfig = KillsConfig()
 
     @Expose
     @Category(name = "Misc", desc = "")
-    public MiscConfig misc = new MiscConfig();
+    var misc: MiscConfig = MiscConfig()
 }

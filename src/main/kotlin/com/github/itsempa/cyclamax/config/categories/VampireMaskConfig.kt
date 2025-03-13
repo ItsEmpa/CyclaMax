@@ -1,33 +1,26 @@
-package com.github.itsempa.cyclamax.config.categories;
+package com.github.itsempa.cyclamax.config.categories
 
-import at.hannibal2.skyhanni.config.core.config.Position;
-import com.google.gson.annotations.Expose;
-import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean;
-import io.github.notenoughupdates.moulconfig.annotations.ConfigLink;
-import io.github.notenoughupdates.moulconfig.annotations.ConfigOption;
+import at.hannibal2.skyhanni.config.core.config.Position
+import at.hannibal2.skyhanni.deps.moulconfig.annotations.ConfigEditorBoolean
+import at.hannibal2.skyhanni.deps.moulconfig.annotations.ConfigLink
+import at.hannibal2.skyhanni.deps.moulconfig.annotations.ConfigOption
+import com.google.gson.annotations.Expose
 
-public class VampireMaskConfig {
-
+class VampireMaskConfig {
     @Expose
     @ConfigOption(
-            name = "Vampire Mask",
-            desc = "Show how many bats are currently spawned\n" +
-                    "§c(may be inaccurate if multiple players are using vampire/witch mask)"
+        name = "Vampire Mask", desc = "Show how many bats are currently spawned\n" +
+                "§c(may be inaccurate if multiple players are using vampire/witch mask)"
     )
     @ConfigEditorBoolean
-    public boolean enabled = true;
+    var enabled: Boolean = true
 
     @Expose
-    @ConfigOption(
-            name = "Highlight Bats",
-            desc = "yeah idk, it just highlights bats from vamp mask"
-    )
+    @ConfigOption(name = "Highlight Bats", desc = "yeah idk, it just highlights bats from vamp mask")
     @ConfigEditorBoolean
-    public boolean highlight = false;
+    var highlight: Boolean = false
 
     @Expose
-    @ConfigLink(owner = VampireMaskConfig.class, field = "enabled")
-    public Position position = new Position(260, -15);
-
-
+    @ConfigLink(owner = VampireMaskConfig::class, field = "enabled")
+    var position: Position = Position(260, -15)
 }

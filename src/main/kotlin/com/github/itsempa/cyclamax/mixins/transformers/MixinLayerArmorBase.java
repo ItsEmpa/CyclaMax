@@ -24,6 +24,6 @@ public class MixinLayerArmorBase<T extends ModelBase>{
             float scale,
             CallbackInfo ci
     ) {
-        if (CyclaMax.getConfig().misc.removeArmorGlint) ci.cancel();
+        if (CyclaMax.getFeature().getMisc().getRemoveArmorGlint()) ci.cancel();
     }
 }

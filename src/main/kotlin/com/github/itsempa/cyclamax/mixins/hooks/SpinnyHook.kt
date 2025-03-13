@@ -6,7 +6,7 @@ import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.entity.player.EntityPlayer
 
 object SpinnyHook {
-    private val config get() = CyclaMax.config.misc
+    private val config get() = CyclaMax.feature.misc
 
     @JvmStatic
     fun rotatePlayer(

@@ -1,14 +1,16 @@
 package com.github.itsempa.cyclamax.features
 
+import at.hannibal2.skyhanni.api.event.HandleEvent
 import at.hannibal2.skyhanni.data.ClickType
 import at.hannibal2.skyhanni.data.IslandType
 import at.hannibal2.skyhanni.events.GuiRenderEvent
 import at.hannibal2.skyhanni.events.InventoryFullyOpenedEvent
 import at.hannibal2.skyhanni.events.ItemClickEvent
-import at.hannibal2.skyhanni.events.LorenzRenderWorldEvent
-import at.hannibal2.skyhanni.events.LorenzTickEvent
+import at.hannibal2.skyhanni.events.minecraft.SkyHanniRenderWorldEvent
+import at.hannibal2.skyhanni.events.minecraft.SkyHanniTickEvent
 import at.hannibal2.skyhanni.utils.ChatUtils
 import at.hannibal2.skyhanni.utils.EntityUtils.getEntities
+import at.hannibal2.skyhanni.utils.HypixelCommands
 import at.hannibal2.skyhanni.utils.InventoryUtils
 import at.hannibal2.skyhanni.utils.ItemUtils.getInternalName
 import at.hannibal2.skyhanni.utils.ItemUtils.getLore
@@ -19,8 +21,9 @@ import at.hannibal2.skyhanni.utils.LocationUtils.distanceTo
 import at.hannibal2.skyhanni.utils.LocationUtils.rayIntersects
 import at.hannibal2.skyhanni.utils.LorenzUtils.isInIsland
 import at.hannibal2.skyhanni.utils.LorenzVec
-import at.hannibal2.skyhanni.utils.NEUInternalName
-import at.hannibal2.skyhanni.utils.NEUInternalName.Companion.asInternalName
+import at.hannibal2.skyhanni.utils.NeuInternalName
+import at.hannibal2.skyhanni.utils.NeuInternalName.Companion.toInternalName
+import at.hannibal2.skyhanni.utils.NeuInternalName.Companion.toInternalNames
 import at.hannibal2.skyhanni.utils.NumberUtil.addSeparators
 import at.hannibal2.skyhanni.utils.NumberUtil.formatLong
 import at.hannibal2.skyhanni.utils.RecalculatingValue
@@ -34,32 +37,31 @@ import at.hannibal2.skyhanni.utils.getLorenzVec
 import at.hannibal2.skyhanni.utils.renderables.Renderable
 import at.hannibal2.skyhanni.utils.toLorenzVec
 import com.github.itsempa.cyclamax.CyclaMax
+import com.github.itsempa.cyclamax.modules.Module
 import net.minecraft.client.Minecraft
 import net.minecraft.entity.passive.EntityMooshroom
 import net.minecraft.item.ItemStack
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.time.Duration.Companion.seconds
 
+@Module
 object KillsCounter {
-    private val config get() = CyclaMax.config.killsCounter
+    private val config get() = CyclaMax.feature.killsCounter
 
-    private val PRECURSOR_EYE by lazy { "PRECURSOR_EYE".asInternalName() }
-    private val witherBlades by lazy {
-        listOf(
+    private val PRECURSOR_EYE = "PRECURSOR_EYE".toInternalName()
+    private val witherBlades = setOf(
             "NECRON_BLADE",
             "VALKYRIE",
             "SCYLLA",
             "ASTRAEA",
             "HYPERION",
-        ).map { it.asInternalName() }.toSet()
-    }
+        ).toInternalNames()
 
     private val bestiaryKillsPattern = "§7Kills: §a(?<kills>[\\d,.]+)".toPattern()
 
     private const val BESTIARY_SKULL =
         "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmI1Mjg0MWYyZmQ1ODllMGJjODRjYmFiZjllMWMyN2NiNzBjYWM5OGY4ZDZiM2RkMDY1ZTU1YTRkY2I3MGQ3NyJ9fX0="
 
-    private fun NEUInternalName.isWitherBlade() = this in witherBlades
+    private fun NeuInternalName.isWitherBlade() = this in witherBlades
 
     private val wearingPrecursorEye by RecalculatingValue(5.seconds) {
         InventoryUtils.getHelmet()?.getInternalName() == PRECURSOR_EYE
@@ -85,22 +87,22 @@ object KillsCounter {
             config.kills = value
         }
 
-    @SubscribeEvent
+    @HandleEvent
     fun onRenderOverlay(event: GuiRenderEvent) {
         if (!isEnabled()) return
         val renderable = display ?: return
         config.position.renderRenderable(renderable, "Kills Counter")
     }
 
-    @SubscribeEvent
-    fun onRenderWorld(event: LorenzRenderWorldEvent) {
+    @HandleEvent
+    fun onRenderWorld(event: SkyHanniRenderWorldEvent) {
         if (!IslandType.THE_FARMING_ISLANDS.isInIsland()) return
         val cow = event.rayTraceMooshroom() ?: return
         recentlyLookedMobs += cow
     }
 
-    @SubscribeEvent
-    fun onTick(event: LorenzTickEvent) {
+    @HandleEvent
+    fun onTick(event: SkyHanniTickEvent) {
         if (!IslandType.THE_FARMING_ISLANDS.isInIsland()) return
         val player = Minecraft.getMinecraft().thePlayer
         recentPositions += player.getLorenzVec()
@@ -109,7 +111,7 @@ object KillsCounter {
         }
     }
 
-    @SubscribeEvent
+    @HandleEvent
     fun onItemUse(event: ItemClickEvent) {
         if (!IslandType.THE_FARMING_ISLANDS.isInIsland()) return
         val item = event.itemInHand ?: return
@@ -126,7 +128,7 @@ object KillsCounter {
         }
     }
 
-    @SubscribeEvent
+    @HandleEvent
     fun onInventoryOpen(event: InventoryFullyOpenedEvent) {
         val inventoryName = event.inventoryName
         val items = event.inventoryItems
@@ -158,7 +160,7 @@ object KillsCounter {
             tips = listOf("§bClick to update!"),
             onClick = {
                 @Suppress("DEPRECATION")
-                ChatUtils.sendCommandToServer("be mushroom cow")
+                ChatUtils.sendMessageToServer("/be mushroom cow")
             },
         )
     }
@@ -223,7 +225,7 @@ object KillsCounter {
         return false
     }
 
-    private fun LorenzRenderWorldEvent.rayTraceMooshroom(): EntityMooshroom? {
+    private fun SkyHanniRenderWorldEvent.rayTraceMooshroom(): EntityMooshroom? {
         val pos = exactPlayerEyeLocation()
         val look = Minecraft.getMinecraft().thePlayer.getLook(partialTicks).toLorenzVec().normalize()
         val possibleEntities = getEntities<EntityMooshroom>().filter {

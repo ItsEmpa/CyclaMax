@@ -1,9 +1,8 @@
 {
-  "package": "com.github.itsempa.cyclamax.mixins.transformers",
-  "refmap": "mixins.cyclamax.refmap.json",
-  "plugin": "com.github.itsempa.cyclamax.mixins.init.CyclaMaxMixinPlugin",
-  "compatibilityLevel": "JAVA_8",
-  "injectors": {
-    "maxShiftBy": 2
-  }
+    "package": "com.github.itsempa.cyclamax.mixins.transformers",
+    "plugin": "com.github.itsempa.cyclamax.mixins.init.CyclaMaxMixinPlugin",
+    "refmap": "mixins.${modid}.refmap.json",
+    "minVersion": "0.7",
+    "compatibilityLevel": "JAVA_8",
+    "__comment": "You do not need to manually register mixins in this template. Check the auto discovery mixin plugin for more info."
 }

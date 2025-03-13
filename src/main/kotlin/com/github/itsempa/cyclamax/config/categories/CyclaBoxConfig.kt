@@ -1,25 +1,23 @@
-package com.github.itsempa.cyclamax.config.categories;
+package com.github.itsempa.cyclamax.config.categories
 
-import com.google.gson.annotations.Expose;
-import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean;
-import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorColour;
-import io.github.notenoughupdates.moulconfig.annotations.ConfigOption;
+import at.hannibal2.skyhanni.deps.moulconfig.annotations.ConfigEditorBoolean
+import at.hannibal2.skyhanni.deps.moulconfig.annotations.ConfigEditorColour
+import at.hannibal2.skyhanni.deps.moulconfig.annotations.ConfigOption
+import com.google.gson.annotations.Expose
 
-public class CyclaBoxConfig {
-
+class CyclaBoxConfig {
     @Expose
     @ConfigOption(name = "Cycla Highlight", desc = "Highlight funny desert cows with a funny sphere")
     @ConfigEditorBoolean
-    public boolean enabled = true;
+    var enabled: Boolean = true
 
     @Expose
     @ConfigOption(name = "Line to nearest", desc = "shows a line to the nearest visible funny cow")
     @ConfigEditorBoolean
-    public boolean lineToNearest = false;
+    var lineToNearest: Boolean = false
 
     @Expose
     @ConfigOption(name = "Sphere color", desc = "coloUr of sphere")
     @ConfigEditorColour
-    public String color = "0:100:255:85:255";
-
+    var color: String = "0:100:255:85:255"
 }

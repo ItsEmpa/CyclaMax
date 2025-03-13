@@ -1,9 +1,11 @@
 package com.github.itsempa.cyclamax.features
 
+import at.hannibal2.skyhanni.api.event.HandleEvent
 import at.hannibal2.skyhanni.data.IslandType
-import at.hannibal2.skyhanni.events.LorenzRenderWorldEvent
-import at.hannibal2.skyhanni.events.LorenzTickEvent
-import at.hannibal2.skyhanni.events.LorenzWorldChangeEvent
+import at.hannibal2.skyhanni.events.entity.EntityEnterWorldEvent
+import at.hannibal2.skyhanni.events.minecraft.SkyHanniRenderWorldEvent
+import at.hannibal2.skyhanni.events.minecraft.SkyHanniTickEvent
+import at.hannibal2.skyhanni.events.minecraft.WorldChangeEvent
 import at.hannibal2.skyhanni.utils.ColorUtils.addAlpha
 import at.hannibal2.skyhanni.utils.ColorUtils.toChromaColor
 import at.hannibal2.skyhanni.utils.EntityUtils.canBeSeen
@@ -14,40 +16,39 @@ import at.hannibal2.skyhanni.utils.RenderUtils.drawSphereInWorld
 import at.hannibal2.skyhanni.utils.RenderUtils.exactLocation
 import at.hannibal2.skyhanni.utils.RenderUtils.exactPlayerEyeLocation
 import com.github.itsempa.cyclamax.CyclaMax
+import com.github.itsempa.cyclamax.modules.Module
 import net.minecraft.entity.passive.EntityMooshroom
-import net.minecraftforge.event.entity.EntityJoinWorldEvent
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
+@Module
 object CyclaBox {
-    private val config get() = CyclaMax.config.cyclaBox
+    private val config get() = CyclaMax.feature.cyclaBox
 
-    private var entities = mutableSetOf<EntityMooshroom>()
+    private val entities = mutableSetOf<EntityMooshroom>()
 
-    @SubscribeEvent
-    fun onEntityJoinWorld(event: EntityJoinWorldEvent) {
-        val entity = event.entity as? EntityMooshroom ?: return
-        entities += entity
+    @HandleEvent
+    fun onEntityJoinWorld(event: EntityEnterWorldEvent<EntityMooshroom>) {
+        entities += event.entity
     }
 
-    @SubscribeEvent
-    fun onWorldChange(event: LorenzWorldChangeEvent) {
+    @HandleEvent
+    fun onWorldChange(event: WorldChangeEvent) {
         entities.clear()
     }
 
-    @SubscribeEvent
-    fun onTick(event: LorenzTickEvent) {
+    @HandleEvent
+    fun onTick(event: SkyHanniTickEvent) {
         if (!isEnabled()) return
-        entities = entities.filter {
+        entities.removeIf {
             if (it.isDead || it.health == 0F) {
                 // TODO: make an event
                 KillsCounter.killMushroom(it)
                 false
             } else true
-        }.toMutableSet()
+        }
     }
 
-    @SubscribeEvent
-    fun onRenderWorld(event: LorenzRenderWorldEvent) {
+    @HandleEvent
+    fun onRenderWorld(event: SkyHanniRenderWorldEvent) {
         if (!isEnabled()) return
         val color = config.color.toChromaColor()
         entities
