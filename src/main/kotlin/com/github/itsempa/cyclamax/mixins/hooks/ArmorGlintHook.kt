@@ -8,8 +8,5 @@ object ArmorGlintHook {
     private val config get() = CyclaMax.feature.misc
 
     @JvmStatic
-    fun shouldHideGlint(item: ItemStack?): Boolean {
-        if (!config.removeArmorGlint) return false
-        return item?.item is ItemArmor
-    }
+    fun shouldHideGlint(item: ItemStack?): Boolean = config.removeArmorGlint && item?.item is ItemArmor
 }

@@ -3,20 +3,20 @@ package com.github.itsempa.cyclamax.features
 import at.hannibal2.skyhanni.api.event.HandleEvent
 import at.hannibal2.skyhanni.data.IslandType
 import at.hannibal2.skyhanni.events.entity.EntityEnterWorldEvent
+import at.hannibal2.skyhanni.events.entity.EntityLeaveWorldEvent
 import at.hannibal2.skyhanni.events.minecraft.SkyHanniRenderWorldEvent
 import at.hannibal2.skyhanni.events.minecraft.SkyHanniTickEvent
 import at.hannibal2.skyhanni.events.minecraft.WorldChangeEvent
 import at.hannibal2.skyhanni.utils.ColorUtils.addAlpha
-import at.hannibal2.skyhanni.utils.ColorUtils.toChromaColor
 import at.hannibal2.skyhanni.utils.EntityUtils.canBeSeen
 import at.hannibal2.skyhanni.utils.LocationUtils.distanceToPlayer
-import at.hannibal2.skyhanni.utils.LorenzUtils.isInIsland
-import at.hannibal2.skyhanni.utils.RenderUtils.draw3DLine
+import at.hannibal2.skyhanni.utils.RenderUtils.drawLineToEye
 import at.hannibal2.skyhanni.utils.RenderUtils.drawSphereInWorld
 import at.hannibal2.skyhanni.utils.RenderUtils.exactLocation
-import at.hannibal2.skyhanni.utils.RenderUtils.exactPlayerEyeLocation
+import at.hannibal2.skyhanni.utils.SpecialColor.toSpecialColor
 import com.github.itsempa.cyclamax.CyclaMax
 import com.github.itsempa.cyclamax.modules.Module
+import com.github.itsempa.cyclamax.utils.CyclaMaxUtils.minByNullableOrNull
 import net.minecraft.entity.passive.EntityMooshroom
 
 @Module
@@ -24,18 +24,29 @@ object CyclaBox {
     private val config get() = CyclaMax.feature.cyclaBox
 
     private val entities = mutableSetOf<EntityMooshroom>()
+    private var closest: EntityMooshroom? = null
 
-    @HandleEvent
-    fun onEntityJoinWorld(event: EntityEnterWorldEvent<EntityMooshroom>) {
-        entities += event.entity
+    @HandleEvent(onlyOnIsland = IslandType.THE_FARMING_ISLANDS)
+    fun onEntityJoinWorld(event: EntityEnterWorldEvent<EntityMooshroom>) = entities.add(event.entity)
+
+    @HandleEvent(onlyOnIsland = IslandType.THE_FARMING_ISLANDS)
+    fun onEntityLeaveWorld(event: EntityLeaveWorldEvent<EntityMooshroom>) {
+        val entity = event.entity
+        // TODO: make an event
+        KillsCounter.killMushroom(entity)
+        entities.remove(entity)
+        if (entity == closest) calculateClosest()
     }
 
     @HandleEvent
-    fun onWorldChange(event: WorldChangeEvent) {
-        entities.clear()
+    fun onWorldChange(event: WorldChangeEvent) = entities.clear()
+
+    private fun calculateClosest(): EntityMooshroom? {
+        closest = entities.minByNullableOrNull { if (it.canBeSeen(50.0)) it.distanceToPlayer() else null }
+        return closest
     }
 
-    @HandleEvent
+    @HandleEvent(onlyOnIsland = IslandType.THE_FARMING_ISLANDS)
     fun onTick(event: SkyHanniTickEvent) {
         if (!isEnabled()) return
         entities.removeIf {
@@ -45,34 +56,37 @@ object CyclaBox {
                 false
             } else true
         }
+        calculateClosest()
     }
 
-    @HandleEvent
+    @HandleEvent(onlyOnIsland = IslandType.THE_FARMING_ISLANDS)
     fun onRenderWorld(event: SkyHanniRenderWorldEvent) {
         if (!isEnabled()) return
-        val color = config.color.toChromaColor()
-        entities
-            .filter { !it.isDead }
-            .sortedBy { if (it.canBeSeen(50.0)) it.distanceToPlayer() else Double.MAX_VALUE }
-            .forEachIndexed { index, entity ->
-                val pos = event.exactLocation(entity).add(y = 0.75)
-                if (index == 0 && config.lineToNearest && entity.canBeSeen(50.0)) {
-                    event.draw3DLine(
-                        event.exactPlayerEyeLocation(),
-                        pos,
-                        color.addAlpha(255),
-                        3,
-                        true,
-                    )
-                }
-                event.drawSphereInWorld(
-                    color,
-                    pos,
-                    1.5f,
-                )
-            }
+        val color = config.color.toSpecialColor()
+
+        if (entities.isEmpty()) return
+        val first = closest?.takeIf { !it.isDead } ?: calculateClosest() ?: return
+
+        if (config.lineToNearest && first.canBeSeen(50.0)) {
+            event.drawLineToEye(
+                event.exactLocation(first).add(y = 0.75),
+                color.addAlpha(255),
+                3,
+                true,
+            )
+        }
+
+        for (entity in entities) {
+            if (!entity.canBeSeen(50.0)) continue
+            val pos = event.exactLocation(entity).up(0.75)
+            event.drawSphereInWorld(
+                color,
+                pos,
+                1.5f,
+            )
+        }
     }
 
-    private fun isEnabled() = IslandType.THE_FARMING_ISLANDS.isInIsland() && config.enabled
+    private fun isEnabled() = config.enabled
 
 }

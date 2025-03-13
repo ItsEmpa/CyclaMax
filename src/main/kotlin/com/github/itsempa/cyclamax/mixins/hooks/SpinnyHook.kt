@@ -9,9 +9,7 @@ object SpinnyHook {
     private val config get() = CyclaMax.feature.misc
 
     @JvmStatic
-    fun rotatePlayer(
-        player: EntityPlayer,
-        partialTicks: Float) {
+    fun rotatePlayer(player: EntityPlayer, partialTicks: Float) {
         if (!config.spin) return
         val name = player.name ?: return
         if (name != LorenzUtils.getPlayerName()) return

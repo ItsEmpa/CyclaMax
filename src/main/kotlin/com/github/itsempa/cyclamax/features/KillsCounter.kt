@@ -10,7 +10,6 @@ import at.hannibal2.skyhanni.events.minecraft.SkyHanniRenderWorldEvent
 import at.hannibal2.skyhanni.events.minecraft.SkyHanniTickEvent
 import at.hannibal2.skyhanni.utils.ChatUtils
 import at.hannibal2.skyhanni.utils.EntityUtils.getEntities
-import at.hannibal2.skyhanni.utils.HypixelCommands
 import at.hannibal2.skyhanni.utils.InventoryUtils
 import at.hannibal2.skyhanni.utils.ItemUtils.getInternalName
 import at.hannibal2.skyhanni.utils.ItemUtils.getLore
@@ -49,12 +48,12 @@ object KillsCounter {
 
     private val PRECURSOR_EYE = "PRECURSOR_EYE".toInternalName()
     private val witherBlades = setOf(
-            "NECRON_BLADE",
-            "VALKYRIE",
-            "SCYLLA",
-            "ASTRAEA",
-            "HYPERION",
-        ).toInternalNames()
+        "NECRON_BLADE",
+        "VALKYRIE",
+        "SCYLLA",
+        "ASTRAEA",
+        "HYPERION",
+    ).toInternalNames()
 
     private val bestiaryKillsPattern = "§7Kills: §a(?<kills>[\\d,.]+)".toPattern()
 
@@ -87,23 +86,21 @@ object KillsCounter {
             config.kills = value
         }
 
-    @HandleEvent
+    @HandleEvent(onlyOnIsland = IslandType.THE_FARMING_ISLANDS)
     fun onRenderOverlay(event: GuiRenderEvent) {
         if (!isEnabled()) return
         val renderable = display ?: return
         config.position.renderRenderable(renderable, "Kills Counter")
     }
 
-    @HandleEvent
+    @HandleEvent(onlyOnIsland = IslandType.THE_FARMING_ISLANDS)
     fun onRenderWorld(event: SkyHanniRenderWorldEvent) {
-        if (!IslandType.THE_FARMING_ISLANDS.isInIsland()) return
         val cow = event.rayTraceMooshroom() ?: return
         recentlyLookedMobs += cow
     }
 
-    @HandleEvent
+    @HandleEvent(onlyOnIsland = IslandType.THE_FARMING_ISLANDS)
     fun onTick(event: SkyHanniTickEvent) {
-        if (!IslandType.THE_FARMING_ISLANDS.isInIsland()) return
         val player = Minecraft.getMinecraft().thePlayer
         recentPositions += player.getLorenzVec()
         if (player.isSneaking) {
@@ -111,9 +108,8 @@ object KillsCounter {
         }
     }
 
-    @HandleEvent
+    @HandleEvent(onlyOnIsland = IslandType.THE_FARMING_ISLANDS)
     fun onItemUse(event: ItemClickEvent) {
-        if (!IslandType.THE_FARMING_ISLANDS.isInIsland()) return
         val item = event.itemInHand ?: return
         when (event.clickType) {
             ClickType.RIGHT_CLICK -> {
@@ -128,19 +124,18 @@ object KillsCounter {
         }
     }
 
-    @HandleEvent
+    @HandleEvent(onlyOnSkyblock = true)
     fun onInventoryOpen(event: InventoryFullyOpenedEvent) {
         val inventoryName = event.inventoryName
         val items = event.inventoryItems
         val stack = items[4] ?: return
         if (!isBestiaryGui(stack, inventoryName)) return
-        items.values.firstOrNull { item ->
+        val item = items.values.find { item ->
             item.getSkullTexture() == BESTIARY_SKULL && item.name.startsWith("§aMushroom Cow ")
-        }?.let { item ->
-            bestiaryKillsPattern.firstMatcher(item.getLore()) {
-                kills = group("kills").formatLong()
-                update()
-            }
+        } ?: return
+        bestiaryKillsPattern.firstMatcher(item.getLore()) {
+            kills = group("kills").formatLong()
+            update()
         }
     }
 
@@ -151,15 +146,14 @@ object KillsCounter {
     }
 
     private fun update() {
-        val stringRenderable = Renderable.string("§aKills: §b${kills.addSeparators()}")
+        val text = Renderable.string("§aKills: §b${kills.addSeparators()}")
         display = Renderable.clickAndHover(
             Renderable.hoverable(
-                Renderable.underlined(stringRenderable),
-                stringRenderable,
+                Renderable.underlined(text),
+                text,
             ),
             tips = listOf("§bClick to update!"),
             onClick = {
-                @Suppress("DEPRECATION")
                 ChatUtils.sendMessageToServer("/be mushroom cow")
             },
         )
@@ -175,7 +169,7 @@ object KillsCounter {
     }
 
     private fun handleWitchMask(pos: LorenzVec): Boolean {
-        val locations = runCatching { VampireMask.batDeathLocations.toSet() }.getOrNull() ?: return false
+        val locations = VampireMask.batDeathLocations
         if (locations.isEmpty()) return false
         if (locations.none { it.distance(pos) < 5.0 }) return false
         return addKill()
@@ -200,7 +194,7 @@ object KillsCounter {
         return addKill()
     }
 
-    private val bestiaryTitlePattern = "^(?:\\(\\d+/\\d+\\) )?(Bestiary|.+) ➜ (.+)\$".toPattern()
+    private val bestiaryTitlePattern = "(?:\\(\\d+/\\d+\\) )?(Bestiary|.+) ➜ (.+)".toPattern()
 
     /**
      * Taken and modified from SkyHanni
@@ -237,13 +231,12 @@ object KillsCounter {
     }
 
     fun handleBatDeath(pos: LorenzVec) {
-        val locations = runCatching { recentlyDeadNotOwn.toSet() }.getOrNull() ?: return
-        val cow = locations.minByOrNull { it.distanceTo(pos) } ?: return
+        val cow = recentlyDeadNotOwn.minByOrNull { it.distanceTo(pos) } ?: return
         if (cow.distanceTo(pos) > 5) return
         recentlyDeadNotOwn -= cow
         addKill()
     }
 
-    private fun isEnabled() = IslandType.THE_FARMING_ISLANDS.isInIsland() && config.enabled
+    private fun isEnabled() = config.enabled
 
 }

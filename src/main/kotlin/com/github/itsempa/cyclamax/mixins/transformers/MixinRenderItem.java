@@ -26,8 +26,6 @@ public class MixinRenderItem {
 
     @Inject(method = "renderEffect", at = @At("HEAD"), cancellable = true)
     private void onRenderEffect(IBakedModel model, CallbackInfo ci) {
-        if (ArmorGlintHook.shouldHideGlint(cyclamax$lastRenderedItem)) {
-            ci.cancel();
-        }
+        if (ArmorGlintHook.shouldHideGlint(cyclamax$lastRenderedItem)) ci.cancel();
     }
 }
