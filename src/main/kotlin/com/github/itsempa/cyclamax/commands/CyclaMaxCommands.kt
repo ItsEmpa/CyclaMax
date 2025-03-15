@@ -7,6 +7,7 @@ import at.hannibal2.skyhanni.config.commands.CommandCategory
 import at.hannibal2.skyhanni.data.GuiEditManager
 import at.hannibal2.skyhanni.deps.moulconfig.gui.GuiScreenElementWrapper
 import at.hannibal2.skyhanni.utils.ChatUtils
+import at.hannibal2.skyhanni.utils.NumberUtil.formatIntOrNull
 import com.github.itsempa.cyclamax.events.CyclaMaxCommandRegistrationEvent
 import com.github.itsempa.cyclamax.CyclaMax
 import com.github.itsempa.cyclamax.modules.Module
@@ -56,12 +57,11 @@ object CyclaMaxCommands {
                     ChatUtils.chat("§e[CyclaMax] §aSet spin to $text!", prefix = false)
                     return@callback
                 } else {
-                    val number =
-                        args[0].runCatching { toInt() }.getOrNull()?.coerceIn(-500..500)
-                            ?: run {
-                                ChatUtils.chat("§e[CyclaMax] §cInvalid number!", prefix = false)
-                                return@callback
-                            }
+                    val number = args.first().formatIntOrNull()?.coerceIn(-500..500)
+                    if (number == null) {
+                        ChatUtils.chat("§e[CyclaMax] §cInvalid number!", prefix = false)
+                        return@callback
+                    }
                     ChatUtils.chat("§e[CyclaMax] §aSet spin speed to $number!", prefix = false)
                     if (!spinConfig.spin) spinConfig.spin = true
                     spinConfig.spinSpeed = number
