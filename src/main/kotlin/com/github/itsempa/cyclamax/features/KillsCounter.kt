@@ -146,13 +146,15 @@ object KillsCounter {
 
     private fun update() {
         val text = Renderable.string("§aKills: §b${kills.addSeparators()}")
-        display = Renderable.clickAndHover(
-            Renderable.hoverable(
-                Renderable.underlined(text),
-                text,
+        display = Renderable.clickable(
+            Renderable.hoverTips(
+                Renderable.hoverable(
+                    Renderable.underlined(text),
+                    text,
+                ),
+                listOf("§7Left click to become a mushroom cow"),
             ),
-            tips = listOf("§bClick to update!"),
-            onClick = {
+            onLeftClick = {
                 ChatUtils.sendMessageToServer("/be mushroom cow")
             },
         )
