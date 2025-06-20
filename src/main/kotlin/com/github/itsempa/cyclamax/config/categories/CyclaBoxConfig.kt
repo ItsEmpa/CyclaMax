@@ -1,8 +1,10 @@
 package com.github.itsempa.cyclamax.config.categories
 
+import at.hannibal2.skyhanni.deps.moulconfig.ChromaColour
 import at.hannibal2.skyhanni.deps.moulconfig.annotations.ConfigEditorBoolean
 import at.hannibal2.skyhanni.deps.moulconfig.annotations.ConfigEditorColour
 import at.hannibal2.skyhanni.deps.moulconfig.annotations.ConfigOption
+import at.hannibal2.skyhanni.utils.LorenzColor
 import com.google.gson.annotations.Expose
 
 class CyclaBoxConfig {
@@ -19,5 +21,5 @@ class CyclaBoxConfig {
     @Expose
     @ConfigOption(name = "Sphere color", desc = "coloUr of sphere")
     @ConfigEditorColour
-    var color: String = "0:100:255:85:255"
+    var color = LorenzColor.LIGHT_PURPLE.toChromaColor()
 }

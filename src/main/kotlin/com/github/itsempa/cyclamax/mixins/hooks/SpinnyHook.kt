@@ -1,6 +1,6 @@
 package com.github.itsempa.cyclamax.mixins.hooks
 
-import at.hannibal2.skyhanni.utils.LorenzUtils
+import at.hannibal2.skyhanni.utils.PlayerUtils
 import com.github.itsempa.cyclamax.CyclaMax
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.entity.player.EntityPlayer
@@ -12,7 +12,7 @@ object SpinnyHook {
     fun rotatePlayer(player: EntityPlayer, partialTicks: Float) {
         if (!config.spin) return
         val name = player.name ?: return
-        if (name != LorenzUtils.getPlayerName()) return
+        if (name != PlayerUtils.getName()) return
         val spinsPerMinute = config.spinSpeed
         val spinsPerSecond = spinsPerMinute / 60.0
         val degreesPerSecond = spinsPerSecond * 360.0

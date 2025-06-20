@@ -8,12 +8,12 @@ import at.hannibal2.skyhanni.events.minecraft.SkyHanniRenderWorldEvent
 import at.hannibal2.skyhanni.events.minecraft.SkyHanniTickEvent
 import at.hannibal2.skyhanni.events.minecraft.WorldChangeEvent
 import at.hannibal2.skyhanni.utils.ColorUtils.addAlpha
+import at.hannibal2.skyhanni.utils.ColorUtils.toColor
 import at.hannibal2.skyhanni.utils.EntityUtils.canBeSeen
 import at.hannibal2.skyhanni.utils.LocationUtils.distanceToPlayer
 import at.hannibal2.skyhanni.utils.RenderUtils.drawLineToEye
-import at.hannibal2.skyhanni.utils.RenderUtils.drawSphereInWorld
-import at.hannibal2.skyhanni.utils.RenderUtils.exactLocation
-import at.hannibal2.skyhanni.utils.SpecialColor.toSpecialColor
+import at.hannibal2.skyhanni.utils.render.WorldRenderUtils.drawSphereInWorld
+import at.hannibal2.skyhanni.utils.render.WorldRenderUtils.exactLocation
 import com.github.itsempa.cyclamax.CyclaMax
 import com.github.itsempa.cyclamax.modules.Module
 import com.github.itsempa.cyclamax.utils.CyclaMaxUtils.minByNullableOrNull
@@ -62,7 +62,7 @@ object CyclaBox {
     @HandleEvent(onlyOnIsland = IslandType.THE_FARMING_ISLANDS)
     fun onRenderWorld(event: SkyHanniRenderWorldEvent) {
         if (!isEnabled()) return
-        val color = config.color.toSpecialColor()
+        val color = config.color.toColor()
 
         if (entities.isEmpty()) return
         val first = closest?.takeIf { !it.isDead } ?: calculateClosest() ?: return

@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream
 plugins {
     idea
     java
-    id("gg.essential.loom") version "0.10.0.+"
+    id("gg.essential.loom") version "0.10.0.5"
     id("dev.architectury.architectury-pack200") version "0.1.3"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     kotlin("jvm") version "2.0.0"
@@ -54,18 +54,17 @@ sourceSets.main {
 repositories {
     mavenCentral()
     mavenLocal()
-
+    maven("https://maven.teamresourceful.com/repository/maven-public/")
     maven("https://repo.spongepowered.org/maven/")
-    // If you don't want to log in with your real minecraft account, remove this line
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
     maven("https://jitpack.io") {
         content {
             includeGroupByRegex("com\\.github\\..*")
         }
     }
+    maven("https://repo.essential.gg/repository/maven-public/")
     maven("https://repo.nea.moe/releases")
     maven("https://maven.notenoughupdates.org/releases") // NotEnoughUpdates (dev env)
-    maven("https://maven.teamresourceful.com/repository/thatgravyboat/") // DiscordIPC
 }
 
 val shadowImpl: Configuration by configurations.creating {

@@ -2,9 +2,9 @@ package com.github.itsempa.cyclamax.commands
 
 import at.hannibal2.skyhanni.config.commands.CommandBuilder
 import at.hannibal2.skyhanni.utils.StringUtils.splitLines
-import at.hannibal2.skyhanni.utils.chat.Text
-import at.hannibal2.skyhanni.utils.chat.Text.hover
-import at.hannibal2.skyhanni.utils.chat.Text.suggest
+import at.hannibal2.skyhanni.utils.chat.TextHelper
+import at.hannibal2.skyhanni.utils.compat.hover
+import at.hannibal2.skyhanni.utils.compat.suggest
 import com.github.itsempa.cyclamax.CyclaMax
 import net.minecraft.util.IChatComponent
 
@@ -19,8 +19,8 @@ object CyclaMaxHelpCommand {
         val description = command.description.splitLines(200).replace("§r", "§7")
         val categoryDescription = category.description.replace("SkyHanni", CyclaMax.MOD_NAME).splitLines(200).replace("§r", "§7")
 
-        return Text.text("§7 - $color${command.name}") {
-            this.hover = Text.multiline(
+        return TextHelper.text("§7 - $color${command.name}") {
+            this.hover = TextHelper.multiline(
                 "§e/${command.name}",
                 if (description.isNotEmpty()) description.prependIndent("  ") else null,
                 "",
@@ -38,7 +38,7 @@ object CyclaMaxHelpCommand {
 
         val title = "${CyclaMax.MOD_NAME} Commands" + if (search.isNotBlank()) "Matching: \"$search\"" else ""
 
-        Text.displayPaginatedList(
+        TextHelper.displayPaginatedList(
             title,
             filtered,
             chatLineId = HELP_ID,

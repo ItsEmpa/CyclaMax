@@ -25,9 +25,7 @@ import java.util.zip.ZipInputStream;
  */
 public class CyclaMaxMixinPlugin implements IMixinConfigPlugin {
     @Override
-    public void onLoad(String mixinPackage) {
-        InjectionPoint.register(BeforeForLoopInjectionPoint.class);
-    }
+    public void onLoad(String mixinPackage) {}
 
     @Override
     public String getRefMapperConfig() {

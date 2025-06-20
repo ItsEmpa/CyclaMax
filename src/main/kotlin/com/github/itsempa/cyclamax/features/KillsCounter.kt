@@ -14,7 +14,6 @@ import at.hannibal2.skyhanni.utils.InventoryUtils
 import at.hannibal2.skyhanni.utils.ItemUtils.getInternalName
 import at.hannibal2.skyhanni.utils.ItemUtils.getLore
 import at.hannibal2.skyhanni.utils.ItemUtils.getSkullTexture
-import at.hannibal2.skyhanni.utils.ItemUtils.name
 import at.hannibal2.skyhanni.utils.LocationUtils
 import at.hannibal2.skyhanni.utils.LocationUtils.distanceTo
 import at.hannibal2.skyhanni.utils.LocationUtils.rayIntersects
@@ -26,13 +25,14 @@ import at.hannibal2.skyhanni.utils.NumberUtil.addSeparators
 import at.hannibal2.skyhanni.utils.NumberUtil.formatLong
 import at.hannibal2.skyhanni.utils.RecalculatingValue
 import at.hannibal2.skyhanni.utils.RegexUtils.firstMatcher
-import at.hannibal2.skyhanni.utils.RenderUtils.exactPlayerEyeLocation
 import at.hannibal2.skyhanni.utils.RenderUtils.renderRenderable
 import at.hannibal2.skyhanni.utils.SimpleTimeMark
 import at.hannibal2.skyhanni.utils.StringUtils.removeColor
-import at.hannibal2.skyhanni.utils.TimeLimitedSet
+import at.hannibal2.skyhanni.utils.collection.TimeLimitedSet
 import at.hannibal2.skyhanni.utils.getLorenzVec
+import at.hannibal2.skyhanni.utils.render.WorldRenderUtils.exactPlayerEyeLocation
 import at.hannibal2.skyhanni.utils.renderables.Renderable
+import at.hannibal2.skyhanni.utils.renderables.RenderableString
 import at.hannibal2.skyhanni.utils.toLorenzVec
 import com.github.itsempa.cyclamax.CyclaMax
 import com.github.itsempa.cyclamax.modules.Module
@@ -130,7 +130,7 @@ object KillsCounter {
         val stack = items[4] ?: return
         if (!isBestiaryGui(stack, inventoryName)) return
         val item = items.values.find { item ->
-            item.getSkullTexture() == BESTIARY_SKULL && item.name.startsWith("§aMushroom Cow ")
+            item.getSkullTexture() == BESTIARY_SKULL && item.displayName.startsWith("§aMushroom Cow ")
         } ?: return
         bestiaryKillsPattern.firstMatcher(item.getLore()) {
             kills = group("kills").formatLong()
@@ -145,7 +145,7 @@ object KillsCounter {
     }
 
     private fun update() {
-        val text = Renderable.string("§aKills: §b${kills.addSeparators()}")
+        val text = RenderableString("§aKills: §b${kills.addSeparators()}")
         display = Renderable.clickable(
             Renderable.hoverTips(
                 Renderable.hoverable(
